@@ -148,6 +148,7 @@ class DNSMessage
                 unsigned int ttl;
                 int rdlength;
                 int doffs;
+                unsigned char *rdata;
 
             int parse(DNSMessage &m,int offs)
             {
@@ -164,6 +165,7 @@ class DNSMessage
                 rdlength=m.get_ushort(offs);
                 offs+=2;
                 doffs=offs;
+                rdata=m.get_rdata(doffs);
                 offs+=rdlength;
                 return offs;
             }
@@ -314,7 +316,7 @@ class DNSMessage
         unsigned int  get_ushort(int offs)                     { if(offs>=m_length)return 0;  return (int(m_data[offs])<<8)|int(m_data[offs+1]); }
         bool           get_bit   (int offs,int bit)             { if(offs>=m_length)return 0;  return ((get_ushort(offs)<<bit)&0x8000)==0x8000; }
         unsigned int  get_bits  (int offs,int bit,int bits) { if(offs>=m_length)return 0;  return ((get_ushort(offs)<<bit)&0xffff)>>(16-bits); }
-
+        unsigned char *get_rdata(int offs) { if (offs>=m_length) return 0; return m_data+offs;}
 
 
 };

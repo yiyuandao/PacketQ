@@ -252,6 +252,30 @@ RefCountString* Parse_dns::get_rrs(DNSMessage::Header &header, int count, DNSMes
         tmp.append(" ");
         h = g_db.get_value("qtype",rrs[i].type);
         h ? tmp.append(h->data) : tmp.append(SSTR(rrs[i].type));
+
+        in6addr_t   ip;
+        memset(&ip,0,sizeof(in6addr_t));
+
+        if (rrs[i].type == 1) {
+            // A type
+            ip.__in6_u.__u6_addr32[3] = get_int(&rrs[i].rdata[0]);
+            converter.reset();
+            converter.add_attr_ipv4(ip.__in6_u.__u6_addr32[3]);
+            tmp.append(" ");
+            tmp.append(converter.get());
+        } else if (rrs[i].type == 28) {
+            // AAAA type
+            ip.__in6_u.__u6_addr32[3] = get_int(&rrs[i].rdata[0]);
+            ip.__in6_u.__u6_addr32[2] = get_int(&rrs[i].rdata[4]);
+            ip.__in6_u.__u6_addr32[1] = get_int(&rrs[i].rdata[8]);
+            ip.__in6_u.__u6_addr32[0] = get_int(&rrs[i].rdata[12]);
+
+            converter.reset();
+            converter.add_attr_ipv6(&ip.__in6_u.__u6_addr8[0]);
+            tmp.append(" ");
+            tmp.append(converter.get());
+        }
+
     }
     return RefCountString::construct(tmp.c_str());
 }
